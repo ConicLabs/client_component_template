@@ -21,7 +21,8 @@
 # or edit the variables below
 #unique for each env
 #Name of module
-TOP=noc_block_logpwr
+TOP=noc_block_window
+KEYFILE=~/keyfile.conf
 #CLK needs to match the clock for the target module clock line(s)
 CLK="bus_clk ce_clk"
 #CLK="clk"
@@ -85,7 +86,9 @@ lib:
 	# Add the rda module to the rda library
 	cd $(RDA_DIR) && make -f Makefile TOP=$(TOP) NUM_SHAPES=$(NUM_SHAPES) library || (echo "... $$"; exit 1)
 
-add_component_cl
+add_component_cl:
+	echo "Adding component to local and server cache"
+	cl_addcomponent $(KEYFILE) $(RDA_DIR)/lib/ $(TOP)
 
 show_logs: save_logs
 	#display the logs with a python gui
