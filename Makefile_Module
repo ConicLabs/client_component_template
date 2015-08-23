@@ -1,0 +1,98 @@
+# make
+# 
+# Copyright 2015 Consolidated Logic 
+# 
+# This is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+# 
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this software; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+# 
+#run as make -f Makefile_Module TOP= HDL_DIR= RDA_DIR=
+# or edit the variables below
+#unique for each env
+#Name of module
+TOP=noc_block_logpwr
+#CLK needs to match the clock for the target module clock line(s)
+CLK="bus_clk ce_clk"
+#CLK="clk"
+HDL_DIR=./hdl/rfnoc/modules/
+RDA_DIR=./modules/
+CLB_TOLERANCE=50
+BRAM_TOLERANCE=0
+DSP_TOLERANCE=0
+EXTRA_RESOURCE=20
+NUM_SHAPES=10
+SYNTH_LOG=synth_log
+MODULE_LOG=module_log
+MAKEFILE_MODULE_LOG=log
+LOG_BACKUP="log_backup"
+
+default: 
+	#synthesis
+	make -f Makefile_Module synthesis TOP=$(TOP) HDL_DIR=$(HDL_DIR) RDA_DIR=$(RDA_DIR) SYNTH_LOG=$(SYNTH_LOG) || (echo "... $$"; exit 1)
+	#synthesis_clean & synthesis logs
+	make -f Makefile_Module synthesis_clean synthesis_logs TOP=$(TOP) HDL_DIR=$(HDL_DIR) || (echo "... $$"; exit 1)
+	#rda
+	make -f Makefile_Module rda TOP=$(TOP) MODULE_LOG=$(MODULE_LOG) RDA_DIR=$(RDA_DIR) NUM_SHAPES=$(NUM_SHAPES) CLB_TOLERANCE=$(CLB_TOLERANCE) BRAM_TOLERANCE=$(BRAM_TOLERANCE) DSP_TOLERANCE=$(DSP_TOLERANCE); echo $$? || (echo "... $$"; exit 1)
+	#rda_logs
+	make -f Makefile_Module rda_logs MAKEFILE_MODULE_LOG=$(MAKEFILE_MODULE_LOG) RDA_DIR=$(RDA_DIR) 
+	#lib
+	make -f Makefile_Module lib TOP=$(TOP) RDA_DIR=$(RDA_DIR) NUM_SHAPES=$(NUM_SHAPES)
+	#add_component_cloud
+	make -f Makefile_Module add_component_cl TOP=$(TOP) RDA_DIR=$(RDA_DIR)
+	#show_logs
+	make -f Makefile_Module show_logs MAKEFILE_MODULE_LOG=$(MAKEFILE_MODULE_LOG) LOG_BACKUP=$(LOG_BACKUP) 
+	# Possible additional step:
+
+synthesis:
+	# Make the edif
+	cd $(HDL_DIR) && (make -f Makefile_synthesis TOP=$(TOP) 2>&1 || (echo "... $$"; exit 1)) | tee $(SYNTH_LOG)
+	# Put the edif in the rda source directory
+	cp -f $(HDL_DIR)/*.ndf $(RDA_DIR)/src/
+	# Put the ngc(s) in the rda source directory
+	mkdir -p $(RDA_DIR)/src/$(TOP)
+	cp -f $(HDL_DIR)/build/*.ngc $(RDA_DIR)/src/$(TOP)/ 
+
+synthesis_clean:	
+	# clean up the makefile build
+	cd $(HDL_DIR) && make -f Makefile_synthesis TOP=$(TOP) clean || (echo "... $$"; exit 1)
+
+synthesis_logs:
+	# grab important print outs from SYNTH_LOG
+	./makefile_module_log/synth_logger.sh $(HDL_DIR) &
+.PHONY: rda
+rda:
+	# Create the rda module and metadata
+	cd $(RDA_DIR) && (make -f Makefile TOP=$(TOP) CLK=$(CLK) CLB_TOLERANCE=$(CLB_TOLERANCE) \
+		BRAM_TOLERANCE=$(BRAM_TOLERANCE) DSP_TOLERANCE=$(DSP_TOLERANCE) \
+		EXTRA_RESOURCE=$(EXTRA_RESOURCE) 2>&1 || (echo "... $$"; exit 1)) | tee $(MODULE_LOG)
+
+rda_logs:
+	# grab important print outs from MODULE_LOG
+	./$(MAKEFILE_MODULE_LOG)/module_logger.sh $(RDA_DIR)
+
+lib:
+	# Add the rda module to the rda library
+	cd $(RDA_DIR) && make -f Makefile TOP=$(TOP) NUM_SHAPES=$(NUM_SHAPES) library || (echo "... $$"; exit 1)
+
+add_component_cl
+
+show_logs: save_logs
+	#display the logs with a python gui
+	python $(MAKEFILE_MODULE_LOG)/module_log.py $(MAKEFILE_MODULE_LOG)/$(LOG_BACKUP) & 
+
+save_logs:
+	#saves the logs to a seperate folder, can easily be exported
+	if [ $(LOG_BACKUP) != "" ] ; then mkdir $(MAKEFILE_MODULE_LOG)/$(LOG_BACKUP); cp $(MAKEFILE_MODULE_LOG)/*log $(MAKEFILE_MODULE_LOG)/$(LOG_BACKUP)/.; fi
+	
+

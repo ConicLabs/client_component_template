@@ -1,0 +1,79 @@
+
+# make
+# 
+# Copyright 2015 Consolidated Logic 
+# 
+# This is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+# 
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this software; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+# ==========================================================================
+# = Makefile configuration
+# ==========================================================================
+# Top-level module
+# Please use caution when editing this Makefile, or just avoid it.
+TOP = top
+
+# Verilog sources
+VERILOG_SOURCES = $(wildcard $(TOP)/src/*.v)
+VHDL_SOURCES = $(wildcard $(TOP)/src/*.vhd)
+#VHDL_SOURCES = $(wildcard src/*.vhd)
+
+# Precompiled cores (ngd, ncd, edif, etc):
+PRECOMPILED_DIR   = src/precompiled
+PRECOMPILED_CORES = $(wildcard $(PRECOMPILED_DIR)/*) 
+
+# Destination directory where you want the BIT file ( usually ./$(DEST_DIR
+DEST_DIR = ./build
+
+PART = xc7k410tffg900-2
+
+$(shell mkdir -p $(DEST_DIR))
+ $(shell >$(DEST_DIR)/project.prj)
+ $(foreach x,$(VHDL_SOURCES),$(shell echo vhdl work ../$(x) >>$(DEST_DIR)/project.prj))
+ $(foreach x,$(VERILOG_SOURCES),$(shell echo verilog work ../$(x) >>$(DEST_DIR)/project.prj))
+ $(foreach x,$(wildcard $(TOP)/src/*/*.v),$(shell echo verilog work ../$(x) >>$(DEST_DIR)/project.prj))
+
+
+
+$(DEST_DIR)/$(TOP).ngc : $(VERILOG_SOURCES) $(VHDL_SOURCES)
+	# ===========================================================================
+	# = XST (Synthesize)
+	# ===========================================================================
+	mkdir -p $(DEST_DIR)
+	rm -f $(DEST_DIR)/xst.scr
+#	@echo set -xsthdpdir ./xst/                 >$(DEST_DIR)/xst.scr
+	@echo set -checkcmdline no                  >>$(DEST_DIR)/xst.scr
+	@echo run                                   >>$(DEST_DIR)/xst.scr
+	@echo -ifn project.prj                      >>$(DEST_DIR)/xst.scr
+	@echo -ifmt mixed                           >>$(DEST_DIR)/xst.scr
+	@echo -ofn $(TOP)                           >>$(DEST_DIR)/xst.scr
+	@echo -p $(PART)                            >>$(DEST_DIR)/xst.scr
+	@echo -top $(TOP)                           >>$(DEST_DIR)/xst.scr
+	@echo -iobuf NO                             >>$(DEST_DIR)/xst.scr
+#	@echo -uc ../$(XCF)                         >>$(DEST_DIR)/xst.scr
+	@echo -keep_hierarchy yes                   >>$(DEST_DIR)/xst.scr
+#	@echo -sd /home/asohangh/v4/ppcSystem/implementation      >>$(DEST_DIR)/xst.scr
+	@echo -write_timing_constraints yes         >>$(DEST_DIR)/xst.scr
+	cd $(DEST_DIR) && xst -ifn xst.scr -ofn xst.log -intstyle xflow
+	cd $(DEST_DIR) && ngc2edif -w $(TOP).ngc
+	cp $(DEST_DIR)/$(TOP).ndf .
+	vim -c ":5,13d" -c ":wq" $(TOP).ndf
+	cd $(DEST_DIR) && ls
+	cd $(DEST_DIR) && cp ../$(TOP)/src/*/*.ngc . &  
+	cd $(DEST_DIR) && cp ../$(TOP)/src/*.ngc . &  
+	cd $(DEST_DIR) && ls
+
+clean:
+	rm -rf $(DEST_DIR)
+

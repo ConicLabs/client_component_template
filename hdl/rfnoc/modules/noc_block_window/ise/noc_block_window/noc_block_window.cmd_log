@@ -1,0 +1,4 @@
+xst -intstyle ise -ifn "/local/rda/client_components/hdl/usrp/modules/noc_block_window/ise/noc_block_window/noc_block_window.xst" -ofn "/local/rda/client_components/hdl/usrp/modules/noc_block_window/ise/noc_block_window/noc_block_window.syr" 
+xst -intstyle ise -ifn "/local/rda/client_components/hdl/usrp/modules/noc_block_window/ise/noc_block_window/noc_block_window.xst" -ofn "/local/rda/client_components/hdl/usrp/modules/noc_block_window/ise/noc_block_window/noc_block_window.syr" 
+xst -intstyle ise -ifn "/local/rda/client_components/hdl/usrp/modules/noc_block_window/ise/noc_block_window/noc_block_window.xst" -ofn "/local/rda/client_components/hdl/usrp/modules/noc_block_window/ise/noc_block_window/noc_block_window.syr" 
+xst -intstyle ise -ifn "/local/rda/client_components/hdl/usrp/modules/noc_block_window/ise/noc_block_window/noc_block_window.xst" -ofn "/local/rda/client_components/hdl/usrp/modules/noc_block_window/ise/noc_block_window/noc_block_window.syr" 

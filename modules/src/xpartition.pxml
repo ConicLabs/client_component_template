@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<Project Name="config_1" FileVersion="1.2" ProjectVersion="2.0">
+	<Partition Name="/TopWrapper" State="implement" ImportLocation="NONE">
+		<Partition Name="/TopWrapper/PartitionWrapper" State="implement" ImportLocation="NONE" Reconfigurable="true" ReconfigModuleName="RDA_partition">
+		</Partition>
+	</Partition>
+</Project>
+
