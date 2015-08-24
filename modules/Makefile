@@ -36,6 +36,7 @@
 # ===========================================================================
 # = Makefile configuration
 # ===========================================================================
+SHELL = /bin/bash
 # Top-level module
 TOP = passthrough
 # Bitstream name
@@ -50,7 +51,7 @@ LIB_DIR = ./lib
 PRECOMPILED_DIR = $(SRC_DIR)/precompiled
 PRECOMPILED_CORES = $(wildcard $(PRECOMPILED_DIR)/*) 
 # TORC
-TORC = $(RDA_EXEC)/rda_core_libs/ 
+TORC = /usr/share/rda/ 
 # Bus Macro Manipulation
 BMNUM = 0
 # Clock Name
@@ -169,7 +170,7 @@ shape: $(UCF)
 	cp $(BUILD_DIR)/*.ucf $(BUILD_DIR)/UCFs/
 	# Create subdirectories for each shape and move corresponding UCFs over
 	for i in {1..$(NUM_SHAPES)} ; do \
-		if [ -a $(BUILD_DIR)/$(TOP)_$$i-1.ucf ] ; then \
+		if [ -e $(BUILD_DIR)/$(TOP)_$$i-1.ucf ] ; then \
 			mkdir -p $(BUILD_DIR)/$(SUB_PREFIX)$(TOP)_$$i ; \
 			mv $(BUILD_DIR)/$(TOP)_$$i-1.ucf $(BUILD_DIR)/$(SUB_PREFIX)$(TOP)_$$i/$(TOP).ucf ; \
 		fi ; \
@@ -195,9 +196,9 @@ library:
 	# Copy files over to the lib folder
 	let "n=0" ; \
 	for i in {1..$(NUM_SHAPES)} ; do \
-		if [ -a $(BUILD_DIR)/$(SUB_PREFIX)$(TOP)_$$i/$(TOP).ncd ] && [ -a $(BUILD_DIR)/$(SUB_PREFIX)$(TOP)_$$i/$(TOP).bit ] && \
-		   [ -a $(BUILD_DIR)/$(SUB_PREFIX)$(TOP)_$$i/$(TOP).xdl ] && [ -a $(BUILD_DIR)/$(SUB_PREFIX)$(TOP)_$$i/$(TOP).xml ] && \
-		   [ -a $(BUILD_DIR)/$(SUB_PREFIX)$(TOP)_$$i/$(TOP).ucf ] && [ -a $(BUILD_DIR)/$(SUB_PREFIX)$(TOP)_$$i/$(TOP)_par.xdl ] ; then \
+		if [ -e $(BUILD_DIR)/$(SUB_PREFIX)$(TOP)_$$i/$(TOP).ncd ] && [ -e $(BUILD_DIR)/$(SUB_PREFIX)$(TOP)_$$i/$(TOP).bit ] && \
+		   [ -e $(BUILD_DIR)/$(SUB_PREFIX)$(TOP)_$$i/$(TOP).xdl ] && [ -e $(BUILD_DIR)/$(SUB_PREFIX)$(TOP)_$$i/$(TOP).xml ] && \
+		   [ -e $(BUILD_DIR)/$(SUB_PREFIX)$(TOP)_$$i/$(TOP).ucf ] && [ -e $(BUILD_DIR)/$(SUB_PREFIX)$(TOP)_$$i/$(TOP)_par.xdl ] ; then \
 		   	let "n+=1" ; \
 			mkdir -p $(LIB_DIR)/$(TOP)_$$i ; \
 			cp $(BUILD_DIR)/$(SUB_PREFIX)$(TOP)_$$i/$(TOP).ncd $(LIB_DIR)/$(TOP)_$$i/$(TOP).ncd ; \
