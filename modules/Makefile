@@ -51,7 +51,7 @@ LIB_DIR = ./lib
 PRECOMPILED_DIR = $(SRC_DIR)/precompiled
 PRECOMPILED_CORES = $(wildcard $(PRECOMPILED_DIR)/*) 
 # TORC
-TORC = /usr/share/rda/ 
+TORC = $(PYBOMBS_ROOT)/target/share/rda-cc-apps/
 # Bus Macro Manipulation
 BMNUM = 0
 # Clock Name
@@ -97,6 +97,7 @@ $(UCF): $(SRC_DIR)/$(TOP).ndf
 	# = Automatically figure out resource requirements and generate ucf
 	# ===========================================================================
 	mkdir -p $(BUILD_DIR)
+	echo $(TORC)
 	cp -p $(SRC_DIR)/$(TOP).ndf $(BUILD_DIR)/$(TOP).ndf
 	cp -p $(SRC_DIR)/$(TOP)/* $(BUILD_DIR)/ 
 	#Generate Plan Ahead tcl script and then run PA
