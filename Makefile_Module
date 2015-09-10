@@ -35,7 +35,7 @@ EXTRA_RESOURCE=20
 NUM_SHAPES=10
 SYNTH_LOG=synth_log
 MODULE_LOG=module_log
-MAKEFILE_MODULE_LOG=log
+MAKEFILE_MODULE_LOG=makefile_module_log
 LOG_BACKUP="log_backup"
 
 default: 
@@ -92,7 +92,7 @@ add_component_cl:
 
 show_logs: save_logs
 	#display the logs with a python gui
-	python $(MAKEFILE_MODULE_LOG)/module_log.py $(MAKEFILE_MODULE_LOG)/$(LOG_BACKUP) & 
+	python $(MAKEFILE_MODULE_LOG)/makefile_module_log.py $(MAKEFILE_MODULE_LOG)/$(LOG_BACKUP) & 
 
 save_logs:
 	#saves the logs to a seperate folder, can easily be exported
